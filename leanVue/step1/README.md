@@ -1,6 +1,6 @@
 [Do it! vue.js - 장기효] {http://www.yes24.com/Product/Goods/58206961?Acode=101}
 
-##Vue
+## Vue
 
 에반 유(Vue.js 창시자) - "Vue.js의 초점은 더 많은 사람들이 쉽게 웹 앱을 만들 수 있도록 도와주는데 있다."
 
