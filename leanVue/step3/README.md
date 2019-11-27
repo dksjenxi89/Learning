@@ -272,3 +272,132 @@ var app = new Vue({
 ~~~
 
 아직까진 훨씬 활용하기 쉬운 느낌!
+
+### 뷰 컴포넌트 통신
+컴포넌트 간 통신과 유효 범위
+
+앵귤러1이나 백본(Backbone.js)과 같은 초창기 자바스크립트 프레임워크에서는 한 화면을 1개의 View로 간주했다!
+
+따라서 한 화면의 데이터를 해당 화면 영역 어디서든지 호출할 수 있었다.
+
+하지만 Vue.js의 경우 컴포넌트로 화면을 구성하므로 같은 웹페이지라도 데이터를 공유할 수가 없다. 
+
+그 이유는 컴포넌트마다 자체적으로 고유한 유효 범위(scope)를 갖기 때문이다.
+
+이는 뷰 프레임워크 내부적으로 정의 된 특징이다.
+
+따라서 각 컴포넌트의 유효 범위가 독립적이기 때문에 다른 컴포넌트의 값을 직접적으로 참조할 수가 없다!!
+
+~~~Vue
+    <script>
+      var cmp1 = {
+
+        template: '<div>첫 번째 지역 컴포넌트 : {{ cmp1Data }}</div>',
+
+        data: function () {
+          return {
+            cmp1Data : 100
+          }
+        }
+      };
+
+      // 두번째 컴포넌트 내용
+
+      var cmp2 = {
+
+        template: '<div>두 번째 지역 컴포넌트 : {{ cmp2Data }}</div',
+        data: function () {
+          return {
+            cmp2Data : cmp1.data.cmp1Data
+          }
+        }
+      }
+
+      new Vue({
+        el: '#app',
+        components: {
+          'my-component1': cmp1,
+          'my-component2': cmp2
+        }
+      });
+    </script>
+~~~
+위 예제를 코딩해보면 책에서 나온데로 화면에서는 1번 컴포넌트 값 100은 나오지만 2번은 나오지 않는다
+
+다른 컴포넌트의 값을 직접 참조할 수가 없기 때문이라고 한다.
+
+컴포넌트의 유효 범위로 이냏 다른 컴포넌트의 값을 직접 접근하지 못 하기 때문에 나타나는 결과이다!!
+
+이렇게 다른 컴포넌트의 값을 참조하지 못 하기 때문에 생기는 특징도 있다.
+
+뷰에서 미리 정의해 놓은 데이터 전달 방식에 따라 일관 된 자료 구조로 어플리케이션을 작성하게 된다.
+
+그러므로 개발자 개개인의 스타일대로 구성되지 않고, 어플리케이션의 모두 동일한 데이터 흐름을 갖는다.
+
+이렇게 되면 다른 사람의 코드를 빠르게 파악할 수 있어 협업하기에도 좋다.
+
+### 상, 하위 컴포넌트 관계
+각 컴포넌트는 유효 범위를 갖고 있기 때문에 직접 다른 컴포넌트의 값을 참조할 수 없다!
+
+따라서 뷰 프레임워크 자체에서 정의한 컴포넌트 데이터 전달 방법을 따라야 한다.
+
+가장 기본적인 데이터 전달 방법은 바로 상위(부모) - 하위(자식) 컴포넌트 간의 데이터 전달 방법이다.
+
+트리 구조이다..! 
+
+지역 또는 전역 컴포넌트를 등록하면 등록 된 컴포넌트는 자연스레 하위 컴포넌트(자식)가 된다.
+
+그리고 하위 컴포넌트를 등록한 인스턴스는 상위 컴포넌트(부모)가 된다.
+
+(상위 컴포넌트) => [props 전달] => (하위 컴포넌트) => [이벤트 발생] => (상위 컴포넌트) . . .
+
+이렇게 순환 된다.
+
+먼저 상위에서 하위로는 props라는 특별한 속성을 전달한다.
+
+그리고 하위에서 상위로는 기본적으로 이벤트만 전달할 수 있다.
+
+그러면 각 전달 방법에 대해 살펴보자!!
+
+## 이벤트와 함께 데이터를 전달하고 싶은 경우에는 이벤트의 두 번째 인자 값으로 전달하거나 이벤트 버스(Event Bys) 활용 방법이 있다.
+
+~~~HTML
+    <div id="app">
+      <child-component v-bind:propsdata="message"></child-component>
+    </div>
+~~~
+~~~Vue
+    <script>
+      Vue.component('child-component', {
+          props: ['propsdata'],
+          template: '<p>{{ propsdata }}</p>',
+      });
+
+      new Vue({
+        el: '#app',
+
+        data: {
+          message: 'Hello Vue! passed from Parent Component'
+        }
+      });
+
+    </script>
+~~~
+
+작성해야 될 코드 순서대로 정리!!
+1. new Vue()로 인스턴스를 하나 생성한다.
+
+2. Vue.component()를 이용하여 하위 컴포넌트인 child-component를 등록한다.
+
+3. child-component의 내용에 props 속성으로 propsdata를 정의한다.
+
+4. HTML에 컴포넌트 태그를 추가한다. <child-component>태그의 v-bind 속성을 보면, v-bind:propsdata="message"는
+  상위 컴포넌트의 message 속성 값인 Hello Vue! passed from Parent Component 텍스트를 하위 컴포넌트의 propsdata로 전달한다.
+  
+5. child-component의 template 속성에 정의 된 <p>{{ propsdata }}</p>는 Hello Vue! passed from Parent Component가 된다.
+
+위 과정을 더 간단히 정리하면 뷰 인스턴스의 data 속성에 정의 된 message 속성을 하위 컴포넌트에 props로 전달하여 화면에 나타난다.
+
+
+
+
