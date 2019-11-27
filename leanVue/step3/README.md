@@ -208,7 +208,67 @@ Vue.component('컴포넌트 이름', {
 
 컴포넌트 이름은 template 속성에서 사용할 HTML 사용자 정의 태그 이름을 의미한다.
 
-태그 일므의 명명 규칙은 HTML 사용자 정의 태그 스펙에서 강제하는 '모두 소문자'와 '케밥 기법'을 따르지 않아 된다!
+태그 이름의 명명 규칙은 HTML 사용자 정의 태그 스펙에서 강제하는 '모두 소문자'와 '케밥 기법'을 따르지 않아 된다!
 
 ### 사용자 정의 태그 : HTML 표준 태그들 이외에도 웹 개발자가 직접 정의하여 사용할 수 있는 태그
-### 케법 기법 : 변수가 단어의 조합으로 이루어져 있을 때, 단어와 단어 사이를 -로 잇는 변수 명명 방식
+### 케밥 기법 : 변수가 단어의 조합으로 이루어져 있을 때, 단어와 단어 사이를 -로 잇는 변수 명명 방식
+
+~~~Vue
+       Vue.component('my-component', {
+        template : '<div>전역 컴포넌트가 등록되었습니다.</div>'
+
+       });
+
+        new Vue({
+          el: '#app'
+        });
+~~~
+ 
+ 지역 컴포넌트 만들기!
+~~~Vue
+      var cmp = {
+        // 컴포넌트 내용
+        template: '<div>지역 컴포넌트가 등록되었다.</div>'
+
+      };
+
+      new Vue({
+          el: '#app',
+          components: {
+            'my-local-component' : cmp
+          }
+      });
+~~~
+
+따로 변수 선언을 해서 template 속성에 컴포넌트에서 수행할 내용을 작성하고
+Vue 인스턴스에 components 속성에 컴포넌트 이름과 수행할 내용이 적힌 변수명을 적어준다!
+
+아까 풀어본 전역 컴포넌트, 지역 컴포넌트 만들기
+
+~~~JavaScript
+Vue.component('todo-footer', {
+  template: '<p>This is another global child component</p>'
+
+});
+
+var cmp = {
+
+  template: '<p>This is another local child component</p>'
+
+}
+
+var app = new Vue({
+  el: '#app',
+
+  data: {
+    message: 'This is a parent component'
+  },
+
+  components: {
+      todo-list: cmp
+  }
+});
+
+~~~
+
+아직까진 훨씬 활용하기 쉬운 느낌!
