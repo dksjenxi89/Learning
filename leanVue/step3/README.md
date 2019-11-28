@@ -398,6 +398,181 @@ var app = new Vue({
 
 위 과정을 더 간단히 정리하면 뷰 인스턴스의 data 속성에 정의 된 message 속성을 하위 컴포넌트에 props로 전달하여 화면에 나타난다.
 
+### 하위에서 상위 컴포넌트로 이벤트 전달하기
+
+이벤트 발생과 수신
+
+앞에서 배운 props는 상위에서 하위 컴포넌트로 데이터를 전달하는 방식이다. 그럼 반대로 하위 컴포넌트에서 상위 컴포넌트로의
+
+통신은 어떻게 할까?
+
+이벤트를 발생시켜(event emit) 상위 컴포넌트에 신호를 보내면 된다.
+
+상위 컴포넌트에서 하위 컴포넌트의 특정 이벤트가 발생하기를 기다리고 있다가 하위 컴포넌트에서 특정 이벤트가 발생하면 상위 컴포넌트에서
+
+해당 이벤트를 수신하여 상위 컴포넌트의 메서드를 호출하는 것이다.
+
+### 하위에서 상위 컴포넌트로 데이터를 전달할 수는 없을까?
+뷰 공식 사이트의 이벤트 발생 사용 방법에서는 하위에서 상위로 데이터를 전달하는 방법을 다루지 않는다.
+
+왜냐하면 이는 뷰의 단방향 데이터 흐름에 어긋나는 구현 방법이기 때문이다.
+
+하지만 향후에 복잡한 뷰 어플을 구출할 때 이벤트 버스(Event Bus)를 이용하여 데이터를 전달해야 할 경우가 있기 때문이다
 
 
+### 이벤트 발생과 수신 형식
+이벤트 발생과 수신은 $emit()과 v-on: 속성을 사용하여 구현한다. 각각의 형식은 아래와 같다.
 
+~~~Vue
+// 이벤트 발생
+this.$emit('이벤트명');
+//$emit()을 이용한 이벤트 발생
+
+// 이벤트 수신
+<child-component v-on:이벤트명="상위 컴포넌트의 메서드명"></child-component>
+//v-on: 속성을 이용한 이벤트 수신
+~~~
+
+$emit()을 호출하면 괄호 안에 정의 된 이벤트가 발생한다. 그리고 일반적으로 $emit()을 호출하는 위치는 하위 컴포넌트의
+특정 메서드 내부이다. 따라서 $emit()을 호출할 때 사용하는 this는 하위 컴포넌트를 가리킨다.
+
+호출한 이벤트는 하위 컴포넌트를 등록하는 태그(상위 컴포넌트의 template 속성에 위치)에서 v-on:으로 받는다.
+
+하위 컴포넌트에서 발생한 이벤트명을 v-on: 속성에 지정하고, 속성의 값에 이벤트가 발생했을 때 호출 될 상위 컴포넌트의 메서드를 지정한다.
+
+~~~html
+    <div id="app">
+        <child-component v-on:show-log="printText"></child-component>
+    </div>
+~~~
+
+~~~Vue
+        Vue.component('child-component', {
+          template: '<button v-on:click="showLog">show</button>',
+          methods: {
+            showLog: function() {
+              this.$emit('show-log');
+            }
+          }
+        });
+
+        var app = new Vue({
+          el: '#app',
+          data: {
+              message: 'Hello Vue! passed from Parent Component'
+          },
+          methods: {
+            printText: function() {
+              console.log("received an event");
+            }
+          }
+        });
+~~~
+
+실습 코딩 공부
+
+html div태그에 컴포넌트 태그를 넣고
+v-on 속성을 사용해서 이벤트명을 정의해준다.
+
+ <child-component v-on:show-log="printText"></child-component>
+ 
+ v-on:show-log="printText" / show-log는 하위 컴포넌트의 이벤트명이고,
+ 
+ printText는 상위 컴포넌트의 메서드명이다.
+ 
+ 아직은 솔직히 v-on속성의 용법을 잘 모르겠지만 넘어가자.
+ 
+         Vue.component('child-component', {
+          template: '<button v-on:click="showLog">show</button>', // 버튼 요소를 추가한다.
+          methods: { // 메서드를 추가한다.
+            showLog: function() {
+              this.$emit('show-log'); // 이벤트 발생 로직.
+            }
+          }
+        });
+        
+        var app = new Vue({
+          el: '#app',
+          data: {
+              message: 'Hello Vue! passed from Parent Component'
+          },
+          methods: {
+            printText: function() {
+              console.log("received an event");
+            }
+          }
+        });
+        
+ child-component의 [show]버튼을 클리가형 이벤트를 발생시키고, 발생한 이벤트로 상위 컴포넌트(이것만 놓고보면 루트 컴포넌트라고 한다.)의
+ 
+ printText() 메서드를 빌행시키는 예제였다!!
+ 
+ 1. [show] 버튼을 브라우저에서 클릭하면 클릭 이벤트 v-on:click="showLog"에 따라서 showLog 메서드가 실행된다.
+ 2. showLog() 메서드 안에 this.$emit('show-log')가 실행되면서 show-log 이벤트가 발생한다.
+ 3. show-log 이벤트는 <child-component>에 정의한 v-on:show-log에 전달되고, v-on:show-log의 대상 메서드인 최상위 컴포넌트 메서드
+    printText()가 실행된다.
+ 4. printText()는 received an event라는 로그를 출력하는 메서드이므로 마지막으로 콘솔에 로그가 출력된다.
+  
+  ### 같은 레벨의 컴포넌트 간 통신
+상위에서 하위로 props를 전달하고, 하위에서 상위로 이벤트를 전달했다.
+
+이번에는 상위-하위 관계가 아니라 같은 레벨에 있는 컴포넌트끼리 어떻게 통신하는지 알아보자.
+
+![image](https://user-images.githubusercontent.com/57930450/69780808-a3222000-11ef-11ea-9f55-04d0bb0db92f.png)
+
+앞 그림은 같은 상위 컴포넌트를 가지는 2개의 하위 컴포넌트를 나타낸다.
+
+뷰는 상위에서 하위로만 데이터를 전달해야 하는 기본적인 통신 규칙을 따르기 때문에 바로 옆 컴포넌트에 값을 전달하려면
+
+하위에서 공통 상위 컴포넌트로 이벤트를 전달한 후 공통 상위 컴포넌트에서 2개의 하위 컴포넌트에 pops를 내려 보내야 한다.
+
+이런 방식으로 통신해야 하는 이유는 컴포넌트 고유의 유효 범위 때문이다.
+
+다른 컴포넌트의 값을 직접 참조하지 못하므로 기본적인 데이터 전달 방식을 활용하여 같은 레벨 간에 통신이 가능하도록 구조를 갖춰야 한다.
+
+
+하지만 이런 통신 구조를 유지하다 보면 상위 컴포넌트가 필요 없음에도 불구하고 같은 레벨 간에 통신하기 위해 강제로 상위 컴포넌트를 두어야 하는 경우가 발생한다.
+
+이를 해결하는 방법이 바로 이벤트 버스이다.
+
+### 관계 없는 컴포넌트 간 통신 - 이벤트 버스
+이벤트 버스(Event Bus)는 개발자가 지정한 2개의 컴포넌트 간에 데이터를 주고받을 수 있는 방법이다.
+
+앞에서 배운 컴포넌트 통신은 항상 상위 - 하위 구조를 유지해야만 데이터를 주고 받을 수 있다.
+
+이벤트 버스를 이용하면 이런 상위 - 하위 관계를 유지하고 있지 않아도 데이터를 한 컴포넌트에서 다른 컴포넌트로 전달할 수 있다.
+
+![image](https://user-images.githubusercontent.com/57930450/69781117-863a1c80-11f0-11ea-944a-b3233642985f.png)
+
+취하위에 있는 하위 컴포넌트 B에서 상위 컴포넌트 A로 데이터를 전달하려면?
+
+뷰에서 제시하는 기본적인 컴포넌트 통신 방식을 생각했을 때 하위 컴포넌트 B, 상위 컴포넌트 B, 최상위 컴포넌트를 거쳐서 상위 컴포넌트 A까지
+가야 한다. 하지만 웹 앱이 커져 컴포넌트가 많아지면 이런 식의 데이터 전달 방식은 매우 번거롭다!!!
+
+이럴 경우 이벤트 버스를 활용하면 중간 컴포넌트들을 거치지 안혹 하위 컴포넌트 B에서 상위 컴포넌트 A로 바로 데이터를 전달할 수 있어 편하다.
+
+이벤트 버스 형식 연습
+~~~Vue
+// 이벤트 버스를 위한 추가 인스턴스 1개 생성
+var eventBus = new Vue();
+
+// 이벤트를 보내는 컴포넌트
+methods: {
+  메서드명: function() {
+      eventBus.$emit('이벤트명', 데이터);
+  }
+}
+
+// 이벤트를 받는 컴포넌트
+methods: {
+  created: function() {
+    eventBus.$on('이벤트명', function(데이터) {
+      ...
+    });
+  }
+}
+~~~
+
+어플 로직을 담는 인스턴스와 별개로 새로운 인스턴스를 1개 더 생성하고, 새 인스턴스를 이용하여 이벤트를 보내고 받는다.
+
+보내는 컴포넌트에서는 $emit()을, 받는 컴포넌트에서는 $on을 구현한다.
