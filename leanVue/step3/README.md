@@ -576,3 +576,203 @@ methods: {
 어플 로직을 담는 인스턴스와 별개로 새로운 인스턴스를 1개 더 생성하고, 새 인스턴스를 이용하여 이벤트를 보내고 받는다.
 
 보내는 컴포넌트에서는 $emit()을, 받는 컴포넌트에서는 $on을 구현한다.
+
+실습
+~~~html
+<html>
+  <head>
+      <title>Document</title>
+  </head>
+<body>
+    <div id="app">
+        <child-component></child-component>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>
+    <script>
+
+        var eventBus = new Vue();
+
+        Vue.component('child-component', {
+          template: '<div>하위 컴포넌트 영역입니다.<button v-on:click="showLog">show</button></div>',
+          methods:{
+            showLog: function() {
+              eventBus.$emit('triggerEventBus', 100);
+            }
+          }
+        });
+
+        var app = new Vue({
+          el: '#app',
+          created: function() {
+              eventBus.$on('triggerEventBus', function(value) {
+                  console.log("이벤트를 전달받음. 전달받은 값 : ", value);
+              });
+          }
+        });
+
+
+
+    </script>
+</body>
+</html>
+~~~
+
+약간 아리까리한게 있어서 코드에서 모르는 부분을 정리하고 넘어간다...!
+
+## DOM 옵션들
+### el 속성
+타입 : string, element
+제한 사항 : Vue 인스턴스에서만 사용 가능
+
+Vue 인스턴스를 생성했을 때 html 요소(DOM)를 마운트하는데 사용한다..!
+
+### props 속성
+타입 : Array<string> | Object
+++부모 컴포넌트의 데이터를 받을 수 있게 노출++ 된 속성의 리스트/해시이다.
+  
+ 단순한 배열 기반 구문과 사용자 지정 유효성 검사 및 기본값과 같은 고급 구성을 허용하는 Object 기반 구문이 있다.
+ 
+ 
+
+### template 속성
+타입 : string
+
+Vue 인스턴스의 마크업으로  사용할 문자열 템플릿이다. 
+템플릿은 마운트 된 엘리먼트를 대체한다.
+
+### methods
+타입 : { [key:string]: Function }
+
+Vue 인스턴스에 추가할 메소드이다. VM 인스턴스를 통해 직접 접근하거나 디렉티브 표현식에서 사용할 수 있다.
+모든 메소드는 자동으로 this 컨텍스트를 Vue 인스턴스에 바인딩한다.(핵심)
+
+this 컨텍스트를 내포하고 있기 때문에 key로 지정되는 문자열을 스코프 안에 this.key를 하면 정의 되지 않는다고 한다.
+
+## 옵션  / 라이프사이클 훅
+모든 라이프 사이클 훅은 자동으로 ++this 컨텍스트를 인스턴스에 바인딩++하므로 데이터, 계산 된 속성 및 메소드에 접근할 수 있다.
+
+즉, 화살표 함수를 사용해 라이프 사이클 메소드를 정의하면 안 된다.
+
+### created 
+타입 : Function
+
+++인스턴스가 작성 된 후 동기적으로 호출된다.++ 이 단계에서 인스턴스는 데이터 처리, 계산 된 속성, 메소드, 감시/이벤트 콜백 등과같은 옵션 처리를 완료한다. 그러나 마운트가 시작되지 않았으므로 $el 속성을 아직 사용할 수 없다.
+
+## 인스턴스 메소드 / 이벤트
+### vm.$emit(eventName,[...args])
+
+전달인자 : {String} event , [...args]
+
+현재 인스턴스에서 이벤트 트리거를 추가한다. 추가 인자는 리스너의 콜백 함수로 전달된다.
+
+### vm.$on(event, callback)
+전달인자 : {string | Array<string>} event (객체는 2.2.0버전 이상에서만 지원)
+           {Function} callback
+  
+현재 VM에서 사용자 정의 이벤트를 듣는다.
+이벤트는 vm.$emit에 의해 호출 될 수 있다. 콜백은 이러한 이벤트 트리거 메소드에 전달 된 모든 추가 인수를 수신한다.
+
+
+## 디렉티브
+### v-on
+전달인자 : event
+엘리먼트에 이벤트 리스너를 연결한다. 이벤트 유형은 전달인자로 표시된다.
+표현식은 메소드 이름 또는 인라인 구문일 수 있으며, 수식어가 있으면 생략할 수 있다.
+
+일반 엘리먼트에 사용되면 기본 DOM 이벤트만 받는다.
+사용자 정의 컴포넌트에서 사용될 때 해당 하위 컴포넌트에 생성 된 사용자 정의 이벤트를 받는다.
+
+네이티브 DOM 이벤트를 수신하면 메소드는 네이티브 이벤트를 유일한 전달인자로 받는다.
+
+인라인 구문을 사용하는 경우 명령문은 특별한 $event 속성에 접근할 수 있다.
+
+~~~html
+<html>
+  <head>
+      <title>Document</title>
+  </head>
+<body>
+    <div id="app">
+       <child-component></child-component>  
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>
+    <script>
+
+      var eventBus = new Vue();
+
+      Vue.component('child-component', {
+
+        // Vue Dom 옵션들 중 하나, 마크업으로 사용되고, 마운트 된 엘리먼트를 대체한다.
+        template: '<div>하위 컴포넌트 영역<button v-on:click="showLog">Show</button></div>',
+
+        // Vue Dom 옵션들 중 하나, 이벤트 함수를 작성하고 메소드를 구체적으로 작성하는 것 
+        methods:{
+          // 이벤트 이름 적고
+          showLog:function () {
+            // vm / 인스턴스 메소드 $emit으로 이벤트 트리거를 적는다, 추가 인자는 리스너의 콜백 함수이다.
+            eventBus.$emit('triggerEventBus', 100);
+          }
+        }
+      });
+
+      var app = new Vue({
+        // DOM 옵션 중 el 속성. . . DOM을 마운트한다.
+        el: '#app',
+        // 라이프 사이클 훅 인스턴스가 작성 된 후 동기적으로 작동된다.
+        created: function () {
+          // 인스턴스 메소드 $on으로 트리거를 받는다.
+          eventBus.$on('triggerEventBus', function(value) {
+            console.log("이벤트를 전달받음", value);
+          });
+        }        
+      });
+
+    </script>
+</body>
+</html>
+~~~
+
+컴포넌트에서 DOM으로 prop 속성 활용해서 데이터 출력하기
+~~~html
+<html>
+  <head>
+      <title>Document</title>
+  </head>
+<body>
+    <div id="app">
+        <child-component v-bind:propsdata="message"></child-component>
+        <sibling-component v-bind:propsdata2="anotherMessage"></sibling-component>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>
+    <script>
+
+      Vue.component('child-component', {
+        props: ['propsdata'],
+        template: '<p>{{ propsdata }}</p>'
+      });
+
+      Vue.component('sibling-component', {
+        props:['propsdata2'],
+        template: '<p>{{ propsdata2 }}</p>'
+
+      });
+
+      var app = new Vue({
+        el: '#app',
+
+        data: {
+          message: 'Hello Vue! passed from Parent component',
+
+          anotherMessage: '어나더 메시지'
+        }
+      });
+
+
+
+    </script>
+</body>
+</html>
+~~~
