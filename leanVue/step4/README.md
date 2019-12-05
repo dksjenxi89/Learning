@@ -1,3 +1,5 @@
+[Do it! vue.js - 장기효] {http://www.yes24.com/Product/Goods/58206961?Acode=101}
+
 ## 상용 웹 앱을 개발하기 위한 필수 기술들
 - 라우터 & HTTP 통신
 
@@ -303,3 +305,72 @@ ajax가 대중화되면서 많은 웹 앱에서 ajax를 사용하고 있다.
 요즘 가장 많이 사용하는 액시오스(axios)가 바로 그것이다.
 
 ### 뷰 리소스
+뷰 리소스(resource)는 초기에 코어 팀에서 공식적으로 권하는 라이브러리였으나 2016년 말에 에반이 공식적인 지원을 중단하기로 결정하면서
+다시 기존에 관리했던 PageKit 팀의 라이브러리로 돌아갔다.
+
+그 이유는 HTTP 통신 관련 라이브러리는 뷰 라우팅, 상태 관리와 같은 라이브러리와는 다르게 프레임워크에 필수적인 기능이 아니라고 판단했기 때문이다.
+
+그럼에도 불구하고 뷰 리소스는 아직 계속 사용할 수 있는 라이브러리이기 때문에 간단히 살펴본다!!
+
+뷰 리소스를 사용하는 방법은 CDN을 이용해서 라이브러리를 로딩하는 방식과 NPM으로 라이브러리를 설치하는 방법(ES6 기준)이 있다.
+
+CDN 설치 방법을 이용하여 간단히 뷰 리소스로 서버에서 특정 데이터를 받아와 로그로 출력하는 실습을 해본다!
+
+~~~html
+<html>
+<head>
+  <title>Vue Resource Sample</title>
+</head>
+<body>
+  <div id="app">
+    <button v-on:click="getData">프레임워크 목록 가져오기</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.4"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      methods: {
+        getData: function() {
+          this.$http.get(`https://raw.githubusercontent.com/joshua1988/doit-vuejs/master/data/demo.json`)
+              .then(function(response) {
+                console.log(response);
+                console.log(JSON.parse(response.data));
+              });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+~~~
+
+### 액시오스
+액시오스는 현재 뷰 커뮤니티에서 가장 많이 사용되는 HTTP 통신 라이브러리이다.
+
+에반도 뷰 리소스 라이브러리를 공식 라이브러리에서 제외하면서 액시오스를 언급했다고 한다.
+
+액시오스는 깃허브 리포지토리의 별이 3만 개가 넘는데, 이는 뷰 리소스의 8천 개에 비해 압도적으로 많다.
+
+그만큼 많은 개발자들이 관심을 갖고 이용하고 있다는 증거이다. 일반적으로 오픈 소스 라이브러리의 장래성은 깃 허브 리포지토리가
+
+얼마나 활성화되어 있느냐로 판단할 수 있는데, 액시오스가 그런 면에서는 뷰 리소스보다 더 안정적으로 지원되는 라이브러리라고 할 수 있다.
+
+
+또한 액시오스는 Promise 기반의 API 형식이 다양하게 제공되어 별도의 로직을 구현할 필요 없이 주어진 API만으로도 간편하게 원하는 로직을
+구현할 수 있다.
+
+### Promise 기반의 API 형식이란 무엇일까?
+Promise란 서버에 데이터를 요청하여 받아오는 동작과 같은 비동기 로직 처리에 유용한 자바스크립트 객체이다.
+
+자바스크립트는 단일 스레드로 코드를 처리하기 때문에 특정 로직의 처리가 끝날 때까지 기다려 주지 않는다.
+
+따라서 데이터를 요청하고 받아올 때까지 기다렸다가 화면에 나타내는 로직을 실행해야 할 때 주로 Promise를 활용한다.
+
+그리고 데이터를 받아왔을 때 Promise로 데이터를 화면에 표시하거나 연산을 수행하는 등 특정 로직을 수행한다.
+
+데이터 통신과 관련한 여러 라이브러리 대부분에서 Promise를 활용하고 있으며, 액시오스에서도 Promise 기반의 API를 지원한다.
+
+
+
