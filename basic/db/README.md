@@ -74,15 +74,54 @@ MYSQL에서는 5를 반환하기 때문에 요일변환 사용하는 부분을 �
 
 -"비슷한 상황을 겪었어서 이해가 확 된다."
 
-오라클
+### 5. 문자와 문자 합치는 방법이 다르다.
+
+오라클 ||
+
+MYSQL concat()
+
+### 6. 형변환 방법이 다르다.
+
+오라클 to_char, to_number
 
 ~~~sql
-select 컬럼명
-from 테이블명
-were 
+  select to_char(632)
+  from dual;
+~~~
+
+MYSQL cast
+
+~~~sql
+  select cast(1234 as char)
+  from dual;
+~~~
+
+### 7. 페이징 처리가 다르다
+오라클 rownum을 사용하여 where절에서 between으로 1~10번째 자료를 나타낸다.
+
+MYSQL limit을 사용하여 1~10번째자료를 나타낸다
+
+오라클
+~~~sql
+  select *
+  from (select rownum, A.*
+        from(select * from 테이블명) A
+   where rownum between 0 and 10
 ~~~
 
 MYSQL
 
+~~~sql
+  select *
+  from 테이블명 limit 0, 10
+~~~
 
+### 8. 시퀀스 사용시 다음번호 불러오는 방법이 다르다
+
+오라클 시퀀스명.nextval
+
+MYSQL 시퀀스명.currval
+
+
+-"차이점이 있긴 한줄 알았는데 정말 생각없이 있었던거 같다... 한 번 정리할걸..."
 
