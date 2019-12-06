@@ -372,5 +372,86 @@ Promise란 서버에 데이터를 요청하여 받아오는 동작과 같은 비
 
 데이터 통신과 관련한 여러 라이브러리 대부분에서 Promise를 활용하고 있으며, 액시오스에서도 Promise 기반의 API를 지원한다.
 
+액시오스 사용 cdn
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+액시오스로 요청 방식 예제
+
+html에서
+~~~html
+  axios.get('URL 주소').then().catch();
+  
+  axios.post('URL 주소').then().catch();
+~~~
+
+스크립트에서
+~~~script
+  axios({
+    method: 'get',
+    url: 'URL 주소',
+    . . .
+  });
+~~~
+
+api 유형
+- axios.get('URL 주소').then().catch()
+
+처리 결과
+해당 url 주소에 대해 http get 요청을 보낸다.
+
+서버에서 보낸 데이터를 정상적으로 받아오면 **then() 안에 정의한 로직이 실행**되고,
+
+데이터를 받아올 때 오류가 발생하면 **catch()에 정의한 로직이 수행**된다.
+
+axios.post('url 주소').then().catch()
+
+물론 위와 똑같고 post 방식으로 요청 방식만 변경 될 뿐이다.
+
+catch문은 생략 가능하다!! 
+
+- axios{{옵션 속성}}
+http 요청에 대한 자세한 속성들을 직접 정의하여 보낼 수 있다.
+
+데이터를 보낼 때 url, http 요청 방식, 보내는 데이터 유형, 기타 등등
+
+~~~html
+<html>
+  <head>
+      <title>Vue with Axios Sample</title>
+  </head>
+<body>
+    <div id="app">
+        <button v-on:click="getData">프레임워크 목록 가져오기</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+
+      new Vue({
+        el: '#app',
+        methods: {
+          getData: function() {
+            axios.get('https://raw.githubusercontent.com/joshua1988/doit-vuejs/master/data/demo.json')
+            .then(function(response) {
+              console.log(response);
+            });
+          }
+        }
+      });
+
+    </script>
+</body>
+</html>
+~~~
+
+![image](https://user-images.githubusercontent.com/57930450/70300636-5a93e380-183b-11ea-82ec-9026025cf86e.png)
+
+개발자 모드에서 response 객체를 확인해보면 일반 문자열이 아니라 객체 속성이기 때문에
+
+vue resource와는 다르게 JSON.parse()를 사용하여 객체로 변환할 필요가 없다.
+
+이런 부분 때문에 뷰 액시오스가 뷰 리소스보다 사용성이 좋다는 것을 증명해준다.
 
 
